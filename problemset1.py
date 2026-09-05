@@ -1,4 +1,6 @@
 
+print("Hello World")
+
 #introduction
 print("Welcome to problem set one of cs50 as done by patrick Kingsley")
 
