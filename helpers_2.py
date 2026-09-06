@@ -1,4 +1,4 @@
-
+import math
 
 from PIL import Image
 
@@ -208,7 +208,7 @@ def blur():
                             r_l,g_l,b_l = old_img.getpixel((x,y))
                             r_k,g_k,b_k = old_img.getpixel((x-1,y))  
                             r_m,g_m,b_m = old_img.getpixel((x+1,y))
-                            r_o,g_o,b_o = old_img.getpixel((x,y-1))
+                            r_o,g_o,b_o = old_img.getpixel((x,y+1))
                             r_n,g_n,b_n = old_img.getpixel((x-1,y+1))
                             r_p,g_p,b_p = old_img.getpixel((x+1,y+1))
                             r_i,g_i,b_i = old_img.getpixel((x,y-1))
@@ -223,8 +223,63 @@ def blur():
                             new_pixels[x,y] = (new_r,new_g ,new_b)
             
             new_img.save("./images/new_image_2_blur.bmp")      
+            
+def edge():
+     with Image.open("./images/new_image_2_greyscale.bmp") as old_img:
+            old_img = old_img.convert("RGB")
+            width , height = old_img.size
+                     
+                     
+            new_img = Image.new("RGB",(width,height))
+                     
+            old_pixels = old_img.load()
+            new_pixels = new_img.load()
+                     
+            for y in range(height):
+                for x in range(width):
+                    if y == 0 or y == height-1 or x == 0 or x == width-1:
+                        r,g,b = old_img.getpixel((x,y))
+                                                 
+                        new_r = 0
+                        new_g = 0
+                        new_b = 0
+                                                 
+                            
+                        new_pixels[x,y] = (new_r,new_g ,new_b)
+                        
+                    else:
+                        
+                        
+                        r_l,g_l,b_l = old_img.getpixel((x,y))
+                        r_k,g_k,b_k = old_img.getpixel((x-1,y))  
+                        r_m,g_m,b_m = old_img.getpixel((x+1,y))
+                        r_o,g_o,b_o = old_img.getpixel((x,y+1))
+                        r_n,g_n,b_n = old_img.getpixel((x-1,y+1))
+                        r_p,g_p,b_p = old_img.getpixel((x+1,y+1))
+                        r_i,g_i,b_i = old_img.getpixel((x,y-1))
+                        r_h,g_h,b_h = old_img.getpixel((x-1,y-1))
+                        r_j,g_j,b_j = old_img.getpixel((x+1,y-1))
+                        
+                                               
+                        gx_r = ((r_l * 0) + (r_k *(-2)) + (r_m * 2) + (r_o * 0) + (r_n * (-1)) + (r_p * 1) + (r_i * 0) + (r_h * (-1)) + (r_j * 1))
+                        gx_g = ((g_l * 0) + (g_k *(-2)) + (g_m * 2) + (g_o * 0) + (g_n * (-1)) + (g_p * 1) + (g_i * 0) + (g_h * (-1)) + (g_j * 1))
+                        gx_b = ((b_l * 0) + (b_k *(-2)) + (b_m * 2) + (b_o * 0) + (b_n * (-1)) + (b_p * 1) + (b_i * 0) + (b_h * (-1)) + (b_j * 1))                            
+                       
+                        gy_r = ((r_l * 0) + (r_k * 0) + (r_m * 0) + (r_o * 2) + (r_n * 1) + (r_p * 1) + (r_i *(-2)) + (r_h *(-1)) + (r_j * (-1)))
+                        gy_g = ((g_l * 0) + (g_k * 0) + (g_m * 0) + (g_o * 2) + (g_n * 1) + (g_p * 1) + (g_i *(-2)) + (g_h *(-1)) + (g_j * (-1)))
+                        gy_b = ((b_l * 0) + (b_k * 0) + (b_m * 0) + (b_o * 2) + (b_n * 1) + (b_p * 1) + (b_i *(-2)) + (b_h *(-1)) + (b_j * (-1)))   
+                       
+                        new_r = min(255, round(math.sqrt((gx_r ** 2) + (gy_r ** 2))))
+                        new_g = min(255, round(math.sqrt((gx_g ** 2) + (gy_g ** 2))))
+                        new_b = min(255, round(math.sqrt((gx_b ** 2) + (gy_b ** 2))))
+                        
+                        new_pixels[x,y] = (new_r,new_g ,new_b)
+                        
+            new_img.save("./images/new_image_3.bmp")        
+                        
 
 #serpia()
-#greyscale()    
+greyscale()    
 #reflect()     
-blur()   
+#blur()
+edge()   

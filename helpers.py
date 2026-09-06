@@ -1,6 +1,8 @@
 '''a file is just a sequence of bits, arranged in some fashion. A 24-bit BMp file is essenstially just a sequence of bits, (almost) every 24 of which represent some pixel color. BMP file also contains "metadata", information like an image's height and width, and this data is stored at the beginning of the file in form of two data structure generally referred to as "headers".1. BITMAPINFOHEADER: 40 bytes long,   BITMAPFILEHEADER: 14 BYTES long, following this two headers is the actual BITMAP: an array of bytes,triples which represent a pixel colour, BMP stores triples in reverse(BGR) with 8 bits for each, some also store the entire bitmap backwards, with an image top row at the end of BMP file'''
 
 
+import math
+
 from PIL import Image
 import sys, os 
 import struct
@@ -408,7 +410,58 @@ def blur(input, output):
             
             new_img.save(output)      
 
-
+def edge(input, output):
+     with Image.open(input) as old_img:
+            old_img = old_img.convert("RGB")
+            width , height = old_img.size
+                     
+                     
+            new_img = Image.new("RGB",(width,height))
+                     
+            old_pixels = old_img.load()
+            new_pixels = new_img.load()
+                     
+            for y in range(height):
+                for x in range(width):
+                    if y == 0 or y == height-1 or x == 0 or x == width-1:
+                        r,g,b = old_img.getpixel((x,y))
+                                                 
+                        new_r = 0
+                        new_g = 0
+                        new_b = 0
+                                                 
+                            
+                        new_pixels[x,y] = (new_r,new_g ,new_b)
+                        
+                    else:
+                        
+                        
+                        r_l,g_l,b_l = old_img.getpixel((x,y))
+                        r_k,g_k,b_k = old_img.getpixel((x-1,y))  
+                        r_m,g_m,b_m = old_img.getpixel((x+1,y))
+                        r_o,g_o,b_o = old_img.getpixel((x,y+1))
+                        r_n,g_n,b_n = old_img.getpixel((x-1,y+1))
+                        r_p,g_p,b_p = old_img.getpixel((x+1,y+1))
+                        r_i,g_i,b_i = old_img.getpixel((x,y-1))
+                        r_h,g_h,b_h = old_img.getpixel((x-1,y-1))
+                        r_j,g_j,b_j = old_img.getpixel((x+1,y-1))
+                        
+                                               
+                        gx_r = ((r_l * 0) + (r_k *(-2)) + (r_m * 2) + (r_o * 0) + (r_n * (-1)) + (r_p * 1) + (r_i * 0) + (r_h * (-1)) + (r_j * 1))
+                        gx_g = ((g_l * 0) + (g_k *(-2)) + (g_m * 2) + (g_o * 0) + (g_n * (-1)) + (g_p * 1) + (g_i * 0) + (g_h * (-1)) + (g_j * 1))
+                        gx_b = ((b_l * 0) + (b_k *(-2)) + (b_m * 2) + (b_o * 0) + (b_n * (-1)) + (b_p * 1) + (b_i * 0) + (b_h * (-1)) + (b_j * 1))                            
+                       
+                        gy_r = ((r_l * 0) + (r_k * 0) + (r_m * 0) + (r_o * 2) + (r_n * 1) + (r_p * 1) + (r_i *(-2)) + (r_h *(-1)) + (r_j * (-1)))
+                        gy_g = ((g_l * 0) + (g_k * 0) + (g_m * 0) + (g_o * 2) + (g_n * 1) + (g_p * 1) + (g_i *(-2)) + (g_h *(-1)) + (g_j * (-1)))
+                        gy_b = ((b_l * 0) + (b_k * 0) + (b_m * 0) + (b_o * 2) + (b_n * 1) + (b_p * 1) + (b_i *(-2)) + (b_h *(-1)) + (b_j * (-1)))   
+                       
+                        new_r = min(255, round(math.sqrt((gx_r ** 2) + (gy_r ** 2))))
+                        new_g = min(255, round(math.sqrt((gx_g ** 2) + (gy_g ** 2))))
+                        new_b = min(255, round(math.sqrt((gx_b ** 2) + (gy_b ** 2))))
+                        
+                        new_pixels[x,y] = (new_r,new_g ,new_b)
+                        
+            new_img.save(output)     
    
 # ---------------------------------------------------------
 # COMMAND-LINE FUNCTION DISPATCHER
@@ -422,6 +475,7 @@ if __name__ == "__main__":
         "g"     : greyscale,
         "r"     : reflect,
         "b"     : blur,
+        "e"     : edge,
 
     }
 
@@ -449,3 +503,5 @@ if __name__ == "__main__":
 
 
 '''this took a long time because firstly, i didnt even understand what was not required of me and what was. i used a lot of browsing and ai to get the filter function which was not required of me to work, also it is always important to put check and error messages in your code cause if i did in this at the earlier stage i would have been able to know that the image i wanted to use was not a good one, the rest of the function were relatively easier except the last, came up with the logic and i still had the idea on how to fix the problem but ended up using ai to fix the code. had to learn how to call function from the command line that did not match the name of the file and would be using this going forward , all in all i think this was the one project have spent so much time on, hopefully i get to finish the whole problem set and move on the next. but it had a lot of lessons and maybe later i would label the rest of the code'''
+
+'''with the edge function it was relatively easy as i understood how the algorithm was to function, i did however not comprehend the steps properly, but however fixing the code to perform the right effect that was required was just a few steps from what was firstly produced, long story short Comprehension is key and for now i use Ai as the corrector of my code for now as i continue to get better and learn more syntax'''
